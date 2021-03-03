@@ -1,0 +1,169 @@
+
+   Update
+
+Do sada smo u aplikaciji odradili 'Create' i 'Read' iz CRUD sistema, vreme je za 'Update i
+'Delete'.
+
+Idemo u stranicu za prikaz nasih telefona 'index.blade.php' i dodajemo dugmad za 'Update' i
+'Delete' a zatimi logiku za te radnje.
+
+
+<table class="table">
+            <thead>
+               <tr>
+                   <th>Name</th>
+                   <th>Brand</th>
+                   <th>Price</th>
+                   <th>Delete</th> // ovo
+                   <th>Update</th> // ovo
+               </tr>
+            </thead>
+            <tbody>
+               @foreach ($all_phones as $phone)
+                   <tr>
+                       <td>{{$phone->name}}</td>
+                       <td>{{$phone->brand}}</td>
+                       <td>{{$phone->price}}</td>
+                       <td><a href="" class="btn btn-small btn-danger">Delete</a></td> // ovo
+                       <td><a href="" class="btn btn-small btn-primary">Update</a></td> // ovo
+                    </tr>
+
+               @endforeach
+
+            </tbody>
+        </table>
+
+
+Sada nas zanima koji je 'route' koji treba da upisemo u 'href', da bismo to saznali idemo u
+terminal i kucamo 'artisan komandu':
+
+    'php artisan route:list'
+
+Zatim pronalazimo 'route' za 'Delete' i citamo informacije:
+
+| DELETE    | phones/{phone}                | phones.destroy        | App\Http\Controllers\PhoneController@destroy
+  metoda        route                           funkcija                           Controller
+
+E sad, posto je metoda 'Delete' necemo moci da koristimo 'a' tag jer on nema deklarisanu
+metodu, pa zato moramo da prepravimo i pravimo formu sa 'button' (Pogledati):
+
+         @foreach ($all_phones as $phone)
+                   <tr>
+                       <td>{{$phone->name}}</td>
+                       <td>{{$phone->brand}}</td>
+                       <td>{{$phone->price}}</td>
+                       <td>
+                            <form action="/phones/{{$phone->id}}" method="POST">
+                                @csrf
+                                @method('delete')
+                            <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                            </form>
+                        </td>
+                        <td>
+                           <a href="/phones/{{$phone->id}}/edit" class="btn btn-small btn-primary">Update</a>
+                        </td>
+
+                    </tr>
+
+Ubacujemo token '@csrf' i naznacavamo da je metoda delete '@method('delete')'
+_______________________________________________________________________________________________
+
+Zatim idemo u 'PhoneController' u metodu 'destroy' :
+
+ public function destroy($id)
+    {
+        DB::delete('DELETE * FROM phones WHERE id = ?',[$id]);
+
+        return redirect('/phones');
+    }
+__________________________________________________________________________________________________
+
+ Ponavljamo operaciju za 'Update'. Idemo u terminal:
+
+     'php artisan route:list'
+
+| PUT|PATCH | phones/{phone}                | phones.update         | App\Http\Controllers\PhoneController@update
+  metoda (PUT)  route                                                      Controller
+
+
+Ali pre toga fali nam korak nazad, da odemo u 'edit' koji ce prikazati samu formu za editovanje.
+
+| GET|HEAD  | phones/{phone}/edit           | phones.edit           | App\Http\Controllers\PhoneController@edit
+__________________________________________________________________________________________________
+
+ Sada prvo idemo u 'PhoneController' u 'edit' metodu:
+
+
+       public function edit($id)
+    {
+       $phone = DB::select('SELECT * FROM phones WHERE id = :id', ['id' => '$id'])[0];
+
+       return view('phones.edit', ['phone' => $phone]); // prosledjujemo podatke u view
+    }
+
+__________________________________________________________________________________________________
+
+Idemo u 'view' i kreiramo novu stranicu 'edit.blade.php' za editovanje podataka (Pogledati):
+
+    @section('title')
+    Edit Phone
+    @endsection
+
+    @extends('layouts.master')
+
+    @section('main')
+
+      <h1>Edit Phone</h1>
+
+      <div class="col-10 offset-1">
+       <form action="/phones/{{$phone->id}}" method="POST">
+         @csrf         // ubacujemo token
+
+         {{-- menjamo metodu u PUT jer tako zahteva 'rout' (Pogledati route list) --}}
+
+         @method('put')
+          <input type="text" name="name" value="{{$phone->name}}" class="form-control"><br>
+          <input type="text" name="brand" value="{{$phone->brand}}" class="form-control"><br>
+          <input type="number" name="price" value="{{$phone->price}}" class="form-control"><br>
+          <button type="submit" class="btn btn-warning form-control">Save</button>
+
+       </form>
+      </div>
+
+    @endsection
+
+Sada ako kliknemo na 'edit' digme idemo na stranicu 'edit.blade.php' vidimo tamo popunjenu
+formu sa podacima editovanog telefona iz baze.
+____________________________________________________________________________________________
+
+Sada idemo u metodu 'update' da sacuvamo editovne podatke (Pogledati):
+
+
+     public function update(Request $request, $id)
+    {
+        $request->validate([
+
+            'name' => 'required',
+            'brand' => 'required',
+            'price' => 'required'
+
+            ]);
+
+            DB::update(" UPDATE phones SET name = :name, brand = :brand, price = :price
+             WHERE id = :id", ['name'=>$request->name, 'brand' => $request->brand,
+            'price' => $request->price, 'id' => $id] );
+
+            return redirect('/phones');
+    }
+
+I sada sve odlicno radi, imamo editovane i sacuvane podatke u aplikaciji, nas CRUD sistem
+funkcionise.
+
+
+
+
+
+
+
+
+

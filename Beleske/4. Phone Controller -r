@@ -1,0 +1,166 @@
+
+  Phone Controller -r
+
+U ovom casu napraviccemo novi kontroler 'PhoneController',videcemo da li sa novim laravelom 8
+ima nekih promena i kakvih. Ali prvo pravimo jedan unos u nasu bazu podataka u 'web.php'
+pravimo 'DB::insert()' da dodamo novi telefon.
+
+
+Route::get('/phones', function ()
+{
+
+$new_phone = DB::insert("INSERT INTO phones (name, brand, price) VALUES
+('Note 10', 'Samsung', '88000')");
+
+dd($new_phone);             // Dobijamo 'true' znaci da smo uspesno insertovali
+
+  return view('phones.index');
+});
+
+Zatim uzimamo iz baze taj telefon:
+
+  Route::get('/phones', function ()
+{
+    // get phones
+    // ROW SQL
+
+  $new_phone = DB::insert("INSERT INTO phones (name, brand, price) VALUES
+   ('Note 10', 'Samsung', '88000'), ('Mi 8', 'Xiaomi', 55000)");
+
+    $all_phones = DB::select('SELECT * FROM phones');
+    dd($all_phones);
+  return view('phones.index');
+});
+
+Dobijamo array sa telefonima.
+_______________________________________________________________________________________________
+
+Medjutim, mi znamo da ne zelimo da pisemo neku logiku unutar 'web.php', za ovaj 'Route',
+treba da bude odgovoran neki kontroler. Zato idemo u terminal i kreiramo novi Controller
+'PhoneController' sa svim potrrebnim CRUD metodama.
+
+    PS C:\Users\Nenad\Desktop\project8> php artisan make:controller PhoneController -r
+
+    Controller created successfully.
+
+Prebacujemo kod iz 'web.php' u 'PhoneController' u metodu 'index'.
+
+
+    public function index()
+    {
+            // get phones
+            // ROW SQL
+
+    //   $new_phone = DB::insert("INSERT INTO phones (name, brand, price) VALUES
+    //   ('Note 11', 'Samsung', '98000'), ('Mi 8', 'Xiaomi', '50000')");
+        $all_phones = DB::select('SELECT * FROM phones');
+        dd($all_phones);
+        return view('phones.index');
+    }
+
+A u 'web.php' pozivamo nas 'PhoneController' i metodu 'index' kao sto smo i ranije radili.
+
+
+   Route::get('/phones', 'PhoneController@index');
+
+Medjutim, dobijamo poruku o gresci na nsoj stranici, laravel nas obavestava da
+klasa 'PhoneController'ne postoji. Pa kako to, mi znamo da smo napravili 'PhoneController'.
+Zapravo radi se o novoj sintaksi:
+
+
+     Route::get('/phones', [PhoneController::class, 'index']);
+
+Ovako se u Laravelu 8 pravi 'Route'. Sada ponovo sve radi kako treba.
+E sad, ovo  jeste nova sintaksa za pisnje 'Routa', ali postoji nacin da se vrati stara
+sintaksa, odnosno nacin pisanja, koji je po mnogima laksi i simpaticniji. Pa hajde da
+vidimo kako to mozemo da vratimo stari nacin pisanja 'Routa'.
+
+Idemo u 'app', zatim 'Providers' i u njemu se nalazi fajl 'RouteServiceProvider.php'.
+Ulazimo u taj fajl i u liniji 29 nalazi se zakomentarisan kod:
+
+    // protected $namespace = 'App\\Http\\Controllers';
+
+Otkomentarisacemo taj kod:
+
+        protected $namespace = 'App\\Http\\Controllers';
+
+I ako sada odemo u 'web.php' i vratimo staru sintaksu 'Routa':
+
+    Route::get('/phones', 'PhoneController@index');
+
+Kada odemo na nas projekat, videcemo da sve savrseno radi.
+Ali posto ovde ucimo Laravel 8 koristicemo ipak novu sintaksu, a to znaci da moramo ponovo
+zakomentarisati onu liniju koda ili nas projekat nece raditi kako treba.
+
+  Route::get('/phones', [PhoneController::class, 'index']);
+________________________________________________________________________________________________
+
+Sada idemo u 'PhoneController' u 'index' metodu i tamo cemo nasev view-u koji se nalazi u
+'views' -> 'phones' -> 'index.blade.php' da prosledimo varijablu '$all_phones' koja u sebi
+sadrzi sve telefone iz baze podataka.
+
+
+        public function index()
+    {
+
+        $all_phones = DB::select('SELECT * FROM phones');
+
+        // dd($all_phones);
+
+        return view('phones.index', [ 'all_phones' => $all_phones]);  // Ovde
+    }
+
+Zatim idemo u 'index.blade.php' da napravimo prikaz podataka dobijenih iz baze:
+
+
+@section('main')
+    <h1 class="display-4 m-3">All phones</h1>
+
+    <div class="col-10offset-1">
+        <table class="table">
+            <thead>
+               <tr>
+                   <th>Name</th>
+                   <th>Brand</th>
+                   <th>Price</th>
+               </tr>
+            </thead>
+            <tbody>
+               @foreach ($all_phones as $phone)
+                   <tr>
+                       <td>{{$phone->name}}</td>
+                       <td>{{$phone->brand}}</td>
+                       <td>{{$phone->price}}</td>
+                   </tr>
+               @endforeach
+            </tbody>
+        </table>
+    </div>
+@endsection
+
+Sada smo dobili tabelu sa podacima o telefonimaiz baze podataka.
+______________________________________________________________________________________________
+
+Ovo bi bio kraj ovog casa, medjutim za kraj da vidimo nesto. Mi vidimo da cemo za svaku nasu
+radnju 'create', 'show', 'edit', 'update', 'delete', morati da pravimo putanje ponovo, odnosno
+nove 'Route'. Medjutim, mi cemo probati da putem samo ove jedne putanje, resimo sve te probleme.
+To je upravo tema narednog casa 'Route resource'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

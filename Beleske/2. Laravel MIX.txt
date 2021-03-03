@@ -1,0 +1,104 @@
+
+Instalirali smo novi Laravel 8, isto kao i prethodni put kada smo sedmicu instalirali,postupak je
+potpuno isti, koristili smo 'composer':
+
+   C:\Users\Nenad>composer global require laravel/installer
+
+Zatim smo kreirali novi projekat 'project8':
+
+   C:\Users\Nenad\Desktop>laravel new project8
+
+Zatim smo taj projekat otvorili u 'visual studio codu'.
+
+Pokrenuli smo 'artisan serve' komandu i otvorili  nas projekat u web brauzeru, medjutim
+izgled pocetne stranice sada izgleda drugacije. Dobro mi cemo naravno promeniti tu stranicu.
+
+Medjutim, sta ako mi radimo na nekom starijem projektu i ako moramo da koristimo verziju 7 ili 6
+Laravela,sad cmo da vidimo kako tomozemo da uradimo, da se vratimona staru verziju laravela.
+Moracemo da koristimo 'composer'. Vraticemo se na 'desktop' i kreirati novi projekat,recimo '
+project7' koristeci 'Laravel 7'.
+
+  C:\Users\Nenad\Desktop>composer create-project laravel/laravel=7.0 project7 --prefer dist
+
+Ovo gore bi bio postupak za zeljenu akciju. Mi smo prekinuli instalaciju, jer ovo je samo
+pokazni primer bio. Vracamo se u 'project8'.
+
+Ako odemo u 'webpack.mix.js' videcemo prve promene:
+
+   mix.js('resources/js/app.js', 'public.js')
+      .postCss('resources/css/app.css', 'public/css', [
+            //
+      ]);
+
+ Mi smo to promenili u ovom casu da bismo koristili 'scss'
+
+
+   mix.sass('resources/css/app.scss', 'public/css', [              // U ovo
+
+    ]);
+
+Zatim idemo u 'resources' pronalazimo 'app.css' i menjamo u 'app.scss'.
+___________________________________________________________________________________________
+
+Zatim se vracamo u terminal i kucamo:
+
+  C:\Users\Nenad\Desktop\project8> npm installer
+
+Da bismo instalirali neophodne module za rad 'devDependencies' iz package.json fajla.
+
+Sada smo dobili 'node_modules' folder, hajde sada da unutar njega instaliramo 'bootstrap':
+
+  C:\Users\Nenad\Desktop\project8> npm install bootstrap --save
+
+sada dobijamo 'bootstrap' folder u 'node_modules' i vidimo u package.json  da je bootstrap
+instaliran.
+U tom 'bootstrap' folderu, nalazi se folder 'dist' i u njemu 'bootstrap.css', hajde da povezemo
+taj fajl sa nasim 'app.scss'.
+
+Da bismo to postigli idemo u 'resources' -> 'css' -> 'app.scss' i kucamo:
+
+   @import "~bootstrap/dist/css/bootstrap.css";
+____________________________________________________________________________________________________
+ Da bismo ovo testirali, idemo u 'resources' -> 'views' -> 'welcome.blade.php', koja je
+ nasa pocetna stranica, i pravimo nas prikaz:
+
+   <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <link rel="stylesheet" href="/css/app.css">             // Ovde smo povezali css
+            <title>Document</title>
+        </head>
+        <body>
+            <h1 class="display-4">Laravel 8</h1>
+        </body>
+        </html>
+
+Nas 'css' dolazi iz 'public' foldera,(href="/css/app.css") medjutim, tamo nigde nema ni  'css'
+foldera, ni 'app.css'. Medjutim, ako se vratimo u  'webpack.mix.js' mi smo tamo rekli da se
+unutar 'public' foldera napravi folder 'css' a naravno tu ce biti nas 'app' i ne moze da bude
+'scss' u public folderu, vec kompajliran u 'css'.
+___________________________________________________________________________________________
+
+Sada da bismo testirali pokrecemo komandu 'run watch' koja gleda na sve promene:
+
+  C:\Users\Nenad\Desktop\project8> npm run watch
+
+I kada je je svezavrseno, 'Laravel mix' nas obavestava da je sve uspesno kompajlirano.
+Odlazimo na nasu stranicu i vidimo naslov 'h1' sa klasom display-4 i pise 'Laravel 8',
+baskako smo hteli.
+
+
+
+
+
+
+
+
+
+
+
+
+

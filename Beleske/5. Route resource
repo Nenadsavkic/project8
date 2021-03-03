@@ -1,0 +1,162 @@
+
+   Route resource
+
+Sada cemo da vidimo sta je to 'Route resource' i kako to moze da nam pomogne u nasoj aplikaciji.
+Mi za sada u aplikacji imamo samo dve putanje, to su: '/' i '/phones'. to mozemo i da proverimo
+ako odemo u terminal i kucamo:
+
+   PS C:\Users\Nenad\Desktop\project8> php artisan route:list
+
+ili ako hocemo da sortiramo:
+
+   PS C:\Users\Nenad\Desktop\project8> php artisan route:list --sort
+
+Nase putanje su sa oznakom 'web' na kraju. I vidimo da ih ima dve navedene vec.
+
+
++--------+----------+----------+------+--------------------------------------------+------------+
+| Domain | Method   | URI      | Name | Action                                     | Middleware |
++--------+----------+----------+------+--------------------------------------------+------------+
+|        | GET|HEAD | api/user |      | Closure                                    | api        |
+|        |          |          |      |                                            | auth:api   |
+|        | GET|HEAD | /        |      | Closure                                    | web        |
+|        | GET|HEAD | phones   |      | App\Http\Controllers\PhoneController@index | web        |
++--------+----------+----------+------+--------------------------------------------+------------+
+
+_________________________________________________________________________________________________
+
+Dobro, mi ako odemo u 'web.php' mi vidimo koje su nase putanje, ali ako hocemo da uradimo ceo
+CRUD sistem sa nasim telefonima, mi moramo da dodamo jos putanja. Medjutim, posto mi imamo
+resourcfull controller,to je 'PhoneController' sa svim metodama u njemu , mi sada mozemo da
+napravimo jedan 'Route resource', koji ce automatski kreirati 'route' za sve nase metode.
+Kako cemo to da uradimo? Pa zapravo veoma lako, idemo u 'web.php' vrsimo izmene u 'Routu':
+
+
+    Route::resource('/phone', PhoneController::class);
+
+Ovo gore je 'Route resource'.
+
+Ako odemo u nas projekat videcemo da i dalje sve savrseno radi. A ako odemo u terminal ponovo
+i kucamo ponovo da vidimo nase putanje, videcemo da su tamo izlistane putanje za sve nase metode:
+
+
+     PS C:\Users\Nenad\Desktop\project8> php artisan route:list --sort
+
+
+ +--------+-----------+---------------------+----------------+----------------------------------------------+------------+
+| Domain | Method    | URI                 | Name           | Action                                       | Middleware |
++--------+-----------+---------------------+----------------+----------------------------------------------+------------+
+|        | GET|HEAD  | api/user            |                | Closure                                      | api
+ |
+|        |           |                     |                |                                              | auth:api
+ |
+|        | GET|HEAD  | /                   |                | Closure                                      | web
+ |
+|        | GET|HEAD  | phones              | phones.index   | App\Http\Controllers\PhoneController@index   | web
+ |
+|        | GET|HEAD  | phones/create       | phones.create  | App\Http\Controllers\PhoneController@create  | web
+ |
+|        | POST      | phones              | phones.store   | App\Http\Controllers\PhoneController@store   | web
+ |
+|        | GET|HEAD  | phones/{phone}      | phones.show    | App\Http\Controllers\PhoneController@show    | web
+ |
+|        | GET|HEAD  | phones/{phone}/edit | phones.edit    | App\Http\Controllers\PhoneController@edit    | web
+ |
+|        | PUT|PATCH | phones/{phone}      | phones.update  | App\Http\Controllers\PhoneController@update  | web
+ |
+|        | DELETE    | phones/{phone}      | phones.destroy | App\Http\Controllers\PhoneController@destroy | web
+ |
++--------+-----------+---------------------+----------------+----------------------------------------------+------------+
+
+
+Sada cemo se posluziti metodom 'create':
+
+
+       public function create()
+    {
+        return view('phones.create');
+    }
+
+Zatim idemo u 'views' -> 'phones' i kreiramo stranicu 'create.blade.php'. I u toj stranici prvo
+pravimo sekciju za title, extendujemo layout, zatim pravimo 'main sekciju' u kojoj cemo kreirati
+tabelu za unos podataka novog telefona (Pogledati).
+
+    @section('title')
+    New Phone
+    @endsection
+
+    @extends('layout.master')
+    @section('main')
+
+        <h1 class="display-4 m-3">Create</h1>
+        <div class="col-10 offset-1">
+            <form action="/phones" method="POST">
+                @csrf
+            <input type="text" name="name" placeholder="name" class="form-control"><br>
+            <input type="text" name="brand" placeholder="brand" class="form-control"><br>
+            <input type="number" name="price" placeholder="price" class="form-control"><br>
+            <button type="submit" class="btn btn-primary form-control">Save</button>
+
+            </form>
+        </div>
+
+
+    @endsection
+_________________________________________________________________________________________________
+
+Zatim odlazimo u navigaciju 'navbar.blade.php' koja se nalazi u folderu 'templates' i tamo
+moramo dodati novi link 'New Phone' za ovu novokreiranu stranicu:
+
+  <nav class="navbar bavbar-light bg-light">
+    <a href="/" class="navbar-brand">Laravel Phones</a>
+        <ul class="nav ml-auto">
+            <li class="nav-item"><a href="/phones" class="nav-link">All Phones</a></li>
+            <li class="nav-item"><a href="/phones/create" class="nav-link">New Phone</a></li>
+        </ul>
+  </nav>
+
+  Sada ako odemo na nas projekat videcemo novi link 'New Phone' sa desne strane i ako kliknemo
+  na njega otvara se stranica 'New Phone' sa tabelom za unos podataka.
+_________________________________________________________________________________________________
+
+Zatim idemo u 'store' metodu u 'PhoneController' da napravimo logiku za cuvanje unetih podataka.
+Pravimo logiku za validaciju unetih podataka, unos podataka u bazu podataka i redirekciju na
+stranicu '/phones'.
+
+
+    public function store(Request $request)
+    {
+        $request->validate([       // validacija
+              'name' => 'required',
+              'brand' => 'required',
+              'price' => 'required'
+          ]);
+
+        DB::insert("INSERT INTO phones (name, brand, price) VALUES
+          ('$request->name', '$request->brand', $request->price)");
+
+        return redirect('/phones');
+
+
+    }
+
+  Napomena: $request->price namerno nema navodnike jer je to integer (broj).
+
+I sada testiramo aplikaciju. Ubacujemo podatke o novom telefon u tabelu i dobijamo rezultat
+na stranici sa telefonima vidimo novi telefon iPhone. I naravno ako odemo u phpMyadmin i
+pogledamo nasu bazu, u 'phones' tabeli videcemo podatke o svim nasim telefonima.
+_________________________________________________________________________________________________
+
+Dakle videli smo kako nam 'Route resource' olaksava zivot. Da li to znaci da uvek treba da pravimo
+ovakav 'Route'? Pa zapravo ne. U ovakvom slucaju kada zelimo da pravimo citav CRUD sistem, i kada
+nam trebaju sve nase putanje za CRUD onda cemo lako koristiti 'Route resource', u ostalim
+slucajevima koristicemo nasu standardnu sintaksu koju znamo.
+
+
+
+
+
+
+
+
+

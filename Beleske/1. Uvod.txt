@@ -1,0 +1,22 @@
+
+         UVOD U LARAVEL SEMESTAR 2
+
+
+Izasao je PHP verzija 8 i Laravel verzija 8. Mi nstavljamo gde smo stali.
+U ovom semestru cemo obraditi sledece:
+
+* Laravel MIX -SASS - Bootstrap
+* ROW Sql - Query Builder - Model - Relacije
+* Phones aplikacija
+* Route resource
+* Debugbar
+* Autentikacija - User model - Auth
+* Migracije
+* Kupujem prodajem - OLX
+* Ads - Images - Categories - Filteri
+* Manipulacija migracijama
+* Messages
+
+
+
+

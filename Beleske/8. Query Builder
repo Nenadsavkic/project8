@@ -1,0 +1,186 @@
+
+      Query Builder
+
+
+Jos jedan nacin kako da saljemo upite u nasu bazu jeste 'Query Builder'. Sam Query Builder je
+interfejs koji nam pomaze sa pomocnim funkcijama, da lakse pravimo nase upite.
+
+Sam nas upit putem Query Buildera, uvek ce pocinjati sa  --    DB::table('table_name');
+
+Ono sto je bitno da napomenemo je to da je Query Builder vec osigurao nase upite, tako da ne
+moramo da 'bindujemo' kao sto smo to radili u proslom casu:
+
+    DB::delete('DELETE * FROM phones WHERE id = ?',[$id]);
+________________________________________________________________________________________________
+
+Idemo u 'PhoneController' u metodu 'store',brisemo staru 'DB' sintaksu:
+
+
+        DB::insert("INSERT INTO phones (name, brand, price) VALUES      // Ovo brisemo
+          ('$request->name', '$request->brand', $request->price)");
+          return redirect('/phones');
+
+i umesto nje kreiramo novu 'Query Builder' sintaksu:
+
+
+            DB::table('phones')->insert([
+
+              'name' => $request->name,'brand' => $request->brand,'price' => $request->price
+
+             ]);
+________________________________________________________________________________________________
+
+Zatim idemo u metodu 'index' i brisemo :
+
+   $all_phones = DB::select('SELECT * FROM phones');  // Ovo brisemo
+
+I kreiramo '$all_phones' ali uz pomoc Query Buildera i metode 'get()' koja vraca sve iz table
+'posts':
+
+     $all_phones = DB::table('phones')->get();
+
+I posto ovde koristimo 'Debugbar', ako odemo na stranicu i otvorimo isti, vidimo kolekciju nasih
+telefona.
+
+Druga metoda 'find(x)' vraca jedan telefon po id-u:
+
+     $one_with_id = DB::table('phones')->find(3);
+_______________________________________________________________________________________________
+
+U Debugbaru dobijamo telefon sa id-em 3 a to je 'Mi9'sa svim podacima.
+
+Treca metoda 'select()' vraca telefone samo sa cenom, ovde smo u argumentu preimenovali 'price'
+u 'cena' to je opciono:
+
+
+        $phones_just_price = DB::table('phones')->select('price as cena' )->get();
+_______________________________________________________________________________________________
+
+Sad smo dobili sve telefone sa cenama, ali sta ako hocemo samo cene, nista drugo, koristicemo
+metodu 'pluck(ime)' koja bi u prevodu znacila 'izdvoji':
+
+
+         $cene = DB::table('phones')->pluck('price');
+
+I u Debugbaru dobijamo array koji ima samo cene.
+________________________________________________________________________________________________
+Sledeca metoda 'count()' broji koliko imamo telefona u 'phones':
+
+         $count = DB::table('phones')->count();
+
+Dobiijamo samo broj (5).
+________________________________________________________________________________________________
+
+Sledeca metoda 'max('price')' prikazuje najvisu cenu.
+
+         $max_price = DB::table('phones')->max('price');
+
+Sledece dve metode prikazuju zbir svih cena u ovom slucaju i prosecnu vrednost cena:
+
+      $sum_price = DB::table('phones')->sum('price');  // Prikazuje zbir svih cena.
+      $avg_price = DB::table('phones')->avg('price');  // Prikazuje prosecnu vrednost cena.
+________________________________________________________________________________________________
+
+  Pronalazimo telefon po njegovom imenu 'Redmi 9' pomocu metode 'where()':
+
+      $note12 = DB::table('phones')->where('name','Note 12')->first();
+
+Hocemo samo cenu ovog telefona, opet 'where()' i jos 'value()':
+
+        $redmi9_cena = DB::table('phones')->where('name','Redmi 9')->value('price');
+
+Hocemo telefone po ceni nizoj od 70000 opet 'where()'metoda:
+
+        $low_cost_phones = DB::table('phones')->where('price', '<' ,70000)->get();
+
+Hocemo telefone po ceni nizoj od 70000 i da je 'brand' Xiaomi, opet 'where()'metoda, ovaj put
+kao uslov 'where()' metode imamo array, koji u sebi sadrzi dva arraya za dva uslova
+(da je cena niza od 7000 i da je brend Xiaomi):
+
+    $low_cost_xiaomi = DB::table('phones')->where([['price', '<' ,70000],['brand','Xiaomi']])->get();
+
+Sada obrcemo logiku i trazimo da je cena visa od 7000 i da je brend Apple:
+
+    $high_cost_apple = DB::table('phones')->where([['price', '>' ,70000],['brand','Apple']])->get();
+___________________________________________________________________________________________________
+
+Hajde da vidimo kako bismo koristili  WHERE zajedno sa OR:
+
+  $low_cost_or_iPhone = DB::table('phones')->where('price','<',70000)->orWhere('brand','Apple')->get();
+________________________________________________________________________________________________________
+
+Recimo da imamo mnogo telefona u bazi, a nama trebaju samo oni koji su 'Samsung' i 'Apple'
+ovaj put koristimo metodu 'whereIn()':
+
+        $samsung_i_apple = DB::table('phones')->whereIn('brand',['Apple', 'Samsung']);
+
+Recimo trazimo nesto po datumu koristeci metodu 'whereDate()' primer dole:
+
+        $by_date = DB::table('phones')->whereDate('created_at', '2021-05-13')->get();
+
+Napomena: Ovde gore u postoje varijacije 'where' metode za pretragu datuma, pa mozemo jos
+koristiti: whereDay(), whereMonth(), whereYear().
+___________________________________________________________________________________________________
+
+Sada cemo napraviti upit da vidimo koje telefone uopste imamo unutar nase baze, koristicemo
+metode 'select('name')' i metodu 'distinct()' koja znaci 'nemoj se ponavljati', znaci dobicemo
+samo jedanom 'Apple' , 'Samsung', itd...:
+
+        $all_brands = DB::table('phones')->select('brand')->distinct()->get();
+
+
+Sledeca sintaksa ce sortirati telefone po ceni od najvise do najnize:
+
+        $sort_desc = DB::table('phones')->orderBy('price','desc')->get();
+___________________________________________________________________________________________________
+
+Hajde da prikazemo sortirane telefone na stranici:
+
+U 'PhoneController' u metodi 'index' gde smo sve ovo i radili, treba samo da prosledimo
+ovu varijablu '$sort_desc' nasem view-u.
+
+
+        return view('phones.index', [ 'all_phones' => $all_phones]);   // Ovo menjamo
+
+        return view('phones.index', [ 'all_phones' => $sort_desc]);    // u ovo.
+
+I sada na stranici 'All Phones' imamo sve telefone sortirane po ceni od najvise do najnize.-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+
+     Debugbar
+
+Pre nego sto nastavimo dalje, u ovom casu instaliracemo 'Debugbar', to je jedan mali paket koji
+moze dosta da nam pomogne pri kreiranju laravel aplikacije.
+U web pretrazivacu kucamo 'Laravel debugbar' i idemo na 'git hub' i tamo pod opcijom 'Instalation'
+nalazimo kod za instalaciju iz terminala, upotrebom 'composer-a'.
+
+     composer require barryvdh/laravel-debugbar --dev
+
+Napomena:  Potrebno je imati najnoviju verziju composer-a da bi ovo moglo uspesno da se
+instalira. Meni je instalacija prijavljivala greske sve dok nisam ponovo skiuo composer
+sa zvanicnog sajta i instalirao ga. Sada radi.
+
+Izgleda kao konzola za JavaScript, ima u sebi razne podatke o aplikaciji na kojoj radimo,
+i sigurno moze da nam olaksa rad. Videcemo :)
+
+Ako odemo u 'PhoneController' u metodu 'index' i hocemo da vidimo informacije o nasoj varijabli
+'$all_phones' kucamo:
+
+    Debugbar::info($all_phones);
+
+Medjutim, ovo nece raditi i prijavice gresku u laravelu:
+
+     Class 'App\Http\Controllers\Debugbar' not found
+
+Greska kaze da laravel trazi 'Debugbar'unutar nasih Controllera a to nije tacno, to je zbog
+'namspacea':
+
+     namespace App\Http\Controllers;
+
+Gresku cemo ispraviti dodavanjem kose crte (\) ispred kao u primeru dole:
+
+        \Debugbar::info($all_phones);
+
+I sada sve radi kako treba, i u Debugbaru u opciji 'Messages' vidimo sve nase telefone kao u
+metodi 'dd()' dobijamo array.
+
+U slucaju da nam Debugbar smeta,da lepo vidimo prikaz strane,postoji opcija da se minimizuje
+klikom na krstic 'x' i pretvori se u jednu malu kockicu sa leve strane.
+
+
+
+
+

@@ -1,0 +1,153 @@
+
+   ROW SQL
+
+Najbitnija stvar kada pravimo aplikacije sa Laravelom, jeste dobra komunikacija i rad sa
+bazom podataka.
+
+Pokrenuli smo 'npm run watch' i u drugom terminalu 'php artisan serve', da pokrenemo
+nas projekat.
+
+Ulazimo u '.env' fajl i u njemu podesavamo konekciju sa bazom.
+
+Pokrecemo 'xampp' palimo 'apache' i 'mysql' ulazimo u 'shell'i logujemo se:
+
+    # mysql -u root  (da imamo password dodali bismo: -u lozinka)
+
+Zatim u bazi kreiramo tabelu 'project8':
+
+  MariaDB [(none)]> create database project8;
+  Query OK, 1 row affected (0.009 sec)
+
+U folderu 'views' kreiramo folder 'layouts' i u njemu fajl 'master.blade.php' koji ce biti
+nas glavni layout. Katujemo sve iz 'welcome.blade' i lepimo u 'master.blade', u 'title'
+stavljamo '#yield('title')'.
+
+   <title>@yield('title')</title>
+______________________________________________________________________________________________
+
+U 'body' pravimo navigaciju za aplikaciju 'Laravel Phones':
+
+    <body>
+    <nav class="navbar bavbar-light bg-light">
+        <a href="/" class="navbar-brand">Laravel Phones</a>
+        <ul class="nav ml-auto">
+            <li class="nav-item"><a href="/phones" class="nav-link">All Phones</a></li>
+        </ul>
+    </nav>
+</body>
+______________________________________________________________________________________________
+
+ U 'welcome.blade.php' pravimo sekciju 'title' za naslov i extendujemo 'master.blade.php':
+
+    @section('title')
+      Welcome
+    @endsection
+
+    @extends('layouts.master')
+______________________________________________________________________________________________
+
+U 'views' pravimo novi folder 'templates' i u njemu fajl 'navbar.blade.php',zatim Katujemo
+navbar iz 'master' i lepimo u taj fajl. a u 'master.blade.php' u bodyju includujemo, zatim
+dodajemo 'main' sekciju koja ce prikazati neki sadrzaj na welcome strani, a onda kreiramo
+tu sekciju u 'welcome':
+
+   <body>
+      @include('templates.navbar')
+       <div class="container">
+          @yield('main')
+       </div>
+   </body>
+______________________________________________________________________________________________
+
+U 'welcome' pravimo sekciju 'main' sa naslovom i nekim paragraf textom:
+
+  @section('main')
+
+    <h1 class="display-4 m-3">Welcome to Phones</h1>
+
+    <p>Neki lorem ipsum tekst.</p>
+
+  @endsection
+______________________________________________________________________________________________
+Posto u samom navbaru imamo link ka 'phones'
+
+    <ul class="nav ml-auto">
+        <li class="nav-item"><a href="/phones" class="nav-link">All Phones</a></li>
+    </ul>
+
+hajde da napravimo i takav route u 'web.php':
+
+   Route::get('/phones', function ()
+    {
+      return view('phones.index');
+    });
+
+Ovaj 'Route' vraca view koji vodi na 'index' stranicu u folderu 'phones', zatim idemo da
+napravimo taj folder u 'views' i fajl 'index.blade.php', u tom fajlu ubacujemo kod:
+
+    @section('title')
+       All phones
+    @endsection
+
+    @extends('layouts.master')
+
+    @section('main')
+        <h1 class="display-4 m-3">All phones</h1>
+    @endsection
+________________________________________________________________________________________________
+
+ Sada treba da se povezemo sa bazom.
+ Pravimo migraciju 'create_phones_table':
+
+   PS C:\Users\Nenad\Desktop\project8> php artisan make:migration create_phones_table
+
+Zatimidemo u tu migraciju u 'up' metodu i modifikujemo kod:
+
+    public function up()
+    {
+        Schema::create('phones', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');     // dodajemo ovo
+            $table->string('brand');    // ovo
+            $table->integer('price');   // i ovo
+            $table->timestamps();
+        });
+    }
+
+
+Cuvamo promene, otvaramo trminal i kazemo:
+
+   PS C:\Users\Nenad\Desktop\project8> php artisan migrate
+________________________________________________________________________________________________
+Zatim odlazimo u 'web.php' u nas kreirani route i pravimo 'ROW SQL' stejtment:
+
+   Route::get('/phones', function ()
+{
+    // get phones
+    // ROW SQL
+
+  $all_phones = DB::select('SELECT * FROM phones');
+  dd($all_phones);
+  return view('phones.index');
+});
+
+Kada refreshujemo 'dd($all_phones)' nam vraca prazan array, sto znaci da nas sql stejtment radi.
+Ovo je znakda je sve uspesno i mozemo da nastavimo u sledecem casu.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
