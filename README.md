@@ -17,26 +17,26 @@
 
 ### Install all the dependencies using composer
 
-    ``` bash
-    composer install
-    ```
+   ``` bash
+   composer install
+   ```
 
 ### Copy the example env file and make the required configuration changes in the .env file
     
-    ```bash
-    cp .env.example .env
-    ```
+   ```bash
+   cp .env.example .env
+   ```
 
 ### Generate a new application key
     
-    ```bash
-    php artisan key:generate
-    ```
+   ```bash
+   php artisan key:generate
+   ```
 ### Link storage directory
 
-    ```bash
-    php artisan storage:link
-    ```
+   ```bash
+   php artisan storage:link
+   ```
 
 ### Create database 'mysite' in your local server (xamp), then run migration
 ### Check the database connection in .env before migrating
